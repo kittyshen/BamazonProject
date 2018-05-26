@@ -27,23 +27,62 @@ var connection = mysql.createConnection({
     database: "bamazon"
   });
   
-  connection.connect(function(err) {
-    if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
-    displayProducts();
-  });
+connection.connect(function(err) {
+if (err) throw err;
+console.log("connected as id " + connection.threadId + "\n");
+displayProducts();
+});
 
-  function displayProducts() {
+function displayProducts() {
     console.log("Display all products...\n");
-    connection.query("SELECT * FROM products", function(err, result) {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-    //   console.log(result);
-      // print out the table with data returned from database
-      for(var i =0; i<result.length; i++){
-        tableRowInsert(result[i].item_id,result[i].product_name,result[i].department_name,result[i].price,result[i].stock_quantity);
-      }
-      console.log(table.toString());
-    //   connection.end();
+    connection.query("SELECT * FROM products", function (err, result) {
+        if (err) throw err;
+        var itemArr = [];        //define an item Arr to hold the returns json objects from database
+        // console.log(result);
+        // print out the table with data returned from database
+        for (var i = 0; i < result.length; i++) {
+            itemArr.push(result[i]);  //push each product into item array
+            tableRowInsert(result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity);
+        }
+        console.log(table.toString()); // display the products on sale, then start to prompt user what they want to buy
+
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "Interested in purchase any items on sale or Exit the store?",
+                choices: ["Purchase", "Quit"],
+                name: "action"
+            }
+        ]).then(function (response) {
+            if (response.action == "Quit") { // if user don't wanna buy ,end the connection
+                console.log("Thanks for visiting bamazon, See you again");
+                connection.end();
+            }
+            else {       // user selected purchase, want to buy something from the table
+                inquirer.prompt([
+                    {
+                        type: "input",
+                        message: "Please enter the item # you want to make a purchase on",
+                        name: "itemId"
+                    },
+                    {
+                        type: "input",
+                        message: "Please enter the quantity you want to buy",
+                        name: "itemNum"
+                    }
+                ]).then(function (response) {
+                    var index = parseInt(response.itemId)-1;
+                    // console.log(itemArr[index]);
+                    var itemName = itemArr[index].product_name;
+                    var availableNum = itemArr[index].stock_quantity;  // check items stock inventory 
+                    if (availableNum < response.itemNum) { // if user input more than available stock of the item, display error 
+                        console.log("Sorry, insufficient stock. there is only " + availableNum + " of " + itemName + " available,");
+                        console.log("Default amount of " + availableNum + " add to cart. More on the way!");
+                    }
+                   // updateProduct(itemName, availableNum);
+
+                });
+            }
+        });
     });
-  }
+}
