@@ -4,10 +4,10 @@ var inquirer = require("inquirer");
 var Table = require('cli-table');
  
 // instantiate a table with display products header info
-var table = new Table({
-    head: ['Item #','Product','Department', 'Price', 'Stock Quantity'], colWidths: [8, 40,30,10,20]
-});
- 
+// var table = new Table({
+//     head: ['Item #','Product','Department', 'Price', 'Stock Quantity'], colWidths: [8, 40,30,10,20]
+// });
+var table = new Table();  //define this here to be able to call it in tableRowInsert function
 // table is an Array, so you can `push`, `unshift`, `splice` and friends
 function tableRowInsert(a,b,c,d,e){
     arr = [];
@@ -16,7 +16,7 @@ function tableRowInsert(a,b,c,d,e){
 }
 // tableRowInsert(2,4,5,6,3,2);
 
-console.log(table.toString());
+// console.log(table.toString());
 
 //making a connection
 var connection = mysql.createConnection({
@@ -35,6 +35,9 @@ displayProducts();
 
 function displayProducts() {
     console.log("Display all products...\n");
+    table = new Table({
+        head: ['Item #','Product','Department', 'Price', 'Stock Quantity'], colWidths: [8, 40,30,10,20]
+    });
     connection.query("SELECT * FROM products", function (err, result) {
         if (err) throw err;
         var itemArr = [];        //define an item Arr to hold the returns json objects from database
@@ -46,6 +49,7 @@ function displayProducts() {
         }
         console.log(table.toString()); // display the products on sale, then start to prompt user what they want to buy
 
+        ////// ****** user interaction starts here
         inquirer.prompt([
             {
                 type: "list",
@@ -56,6 +60,7 @@ function displayProducts() {
         ]).then(function (response) {
             if (response.action == "Quit") { // if user don't wanna buy ,end the connection
                 console.log("Thanks for visiting bamazon, See you again");
+                // calTotal();
                 connection.end();
             }
             else {       // user selected purchase, want to buy something from the table
@@ -79,10 +84,44 @@ function displayProducts() {
                         console.log("Sorry, insufficient stock. there is only " + availableNum + " of " + itemName + " available,");
                         console.log("Default amount of " + availableNum + " add to cart. More on the way!");
                     }
-                   // updateProduct(itemName, availableNum);
+                    var purchasedNum = availableNum < response.itemNum? availableNum:response.itemNum; 
+                    availableNum -= purchasedNum;
+                    console.log("current stock of : " + itemName + " : "+availableNum);
+                    console.log("-----------------\n Your receipt \n------------------\n ");
+                    console.log( purchasedNum + " of " +itemName +"\n");
+                    var price = purchasedNum * itemArr[index].price;
+                    console.log("Total : " + price.toFixed(2));
+                    updateProduct(itemName, availableNum);
 
                 });
             }
         });
     });
 }
+
+function updateProduct(name, number){
+    connection.query("UPDATE products SET ? WHERE ?",
+    [{stock_quantity:number},{product_name:name}],
+    function(err,data){
+        if (err) throw err;
+        // console.log(data.affectedRows + " Updated.");
+    });
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Make More purchase? Exit the store?",
+            choices: ["Purchase", "Quit"],
+            name: "action"
+        }
+    ]).then(function (response) {
+        if (response.action == "Quit") { // if user don't wanna buy ,end the connection
+                console.log("Thanks for visiting bamazon, See you again");
+                // calTotal();
+                connection.end();
+            }
+        else {  
+            displayProducts();
+        }
+    });
+}
+ 
