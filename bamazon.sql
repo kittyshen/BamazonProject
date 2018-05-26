@@ -12,7 +12,9 @@ CREATE TABLE products (
   stock_quantity INT NOT NULL DEFAULT 0
 );
 
-INSERT INTO products (department_name,product_name, price, stock_quantity) VALUES ("Toy","Toy Car", 19.20 , 200) ,("Toy","Toy Ship", 25.00, 120);
+INSERT INTO products (department_name,product_name, price, stock_quantity) VALUES ("Toy","Toy Car", 19.20 , 200) ,("Toy","Toy Ship", 25.00, 120),
+("Toy","Toy Airplane", 22.99 , 100),("Game","Dark Souls 3", 29.99 , 50) ,("Game","Spelunker world", 10.00, 100),("Game","Don't starve together", 13.99 , 200),
+("Food","Coke soda 6 pack", 5.00 , 200) ,("Food","Mochi Icecream", 10.00 , 500),("Clothes"," T-top white female", 8.00 , 100),("Clothes","Suite", 80.00 , 30) ;
 
 -- ### Alternative way to insert more than one row
 -- INSERT INTO products (flavor, price, quantity)
