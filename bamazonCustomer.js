@@ -18,6 +18,7 @@ function tableRowInsert(a,b,c,d,e){
 
 // console.log(table.toString());
 
+
 //making a connection
 var connection = mysql.createConnection({
     host: "localhost",
@@ -28,10 +29,12 @@ var connection = mysql.createConnection({
   });
   
 connection.connect(function(err) {
-if (err) throw err;
-console.log("connected as id " + connection.threadId + "\n");
-displayProducts();
+    if (err) throw err;
+    console.log("connected as id " + connection.threadId + "\n");
+    displayProducts();
 });
+
+var itemPurchased = {};
 
 function displayProducts() {
     console.log("Display all products...\n");
@@ -59,7 +62,7 @@ function displayProducts() {
             }
         ]).then(function (response) {
             if (response.action == "Quit") { // if user don't wanna buy ,end the connection
-                console.log("Thanks for visiting bamazon, See you again");
+                console.log("Thanks for visiting bamazon, See you again!");
                 // calTotal();
                 connection.end();
             }
@@ -85,12 +88,17 @@ function displayProducts() {
                         console.log("Default amount of " + availableNum + " add to cart. More on the way!");
                     }
                     var purchasedNum = availableNum < response.itemNum? availableNum:response.itemNum; 
-                    availableNum -= purchasedNum;
+                    availableNum -= purchasedNum; //update the current available amount of the product
                     console.log("current stock of : " + itemName + " : "+availableNum);
-                    console.log("-----------------\n Your receipt \n------------------\n ");
+                    console.log("-----------------\n Your receipt \n-----------------\n ");
                     console.log( purchasedNum + " of " +itemName +"\n");
                     var price = purchasedNum * itemArr[index].price;
                     console.log("Total : " + price.toFixed(2));
+
+                    if(itemPurchased[itemName] == null) itemPurchased[itemName]= price.toFixed(2);  // save the current order as a sub object in the itemPurchased obj
+                    else itemPurchased[itemName] = (parseFloat(itemPurchased[itemName]) + parseFloat(price.toFixed(2))).toFixed(2);
+                    
+                    // console.log(itemPurchased);
                     updateProduct(itemName, availableNum);
 
                 });
@@ -115,13 +123,33 @@ function updateProduct(name, number){
         }
     ]).then(function (response) {
         if (response.action == "Quit") { // if user don't wanna buy ,end the connection
-                console.log("Thanks for visiting bamazon, See you again");
-                // calTotal();
+                calTotal();
+                console.log("Thanks for visiting bamazon, See you again!");
                 connection.end();
             }
         else {  
             displayProducts();
         }
     });
+}
+
+function calTotal(){
+
+    tableReceipt =new Table();
+    var totalPrice =0;
+    console.log("--------------------\n Your Final receipt \n---------------------\n" )
+    for(prop in itemPurchased){
+        // console.log(prop + "  :  " + itemPurchased[prop]);
+        totalPrice += parseFloat(itemPurchased[prop]);
+        tableReceipt.push({[prop] : [itemPurchased[prop]]});
+    }
+    tableReceipt.push({"Total ": totalPrice});
+
+    ////// vertical cli-table reference
+    // tableReceipt.push(
+    //     { 'Some key': 'Some value' }
+    //   , { 'Another key': 'Another value' }
+    // );
+    console.log(tableReceipt.toString());
 }
  
