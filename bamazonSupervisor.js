@@ -74,138 +74,27 @@ function addDept(){
 }
 
 function viewSales(){
-
-    connection.query("SELECT * FROM departments as A LEFT JOIN products as B ON A.department_name = B.department_name ", function (err, result) {
+  
+    // create sum of rows group by same department reference forum post https://stackoverflow.com/questions/6335240/php-mysql-add-rows-together-to-get-total
+    connection.query("SELECT A.department_id,A.department_name, A.over_head_costs,SUM(B.product_sales) AS totalSale FROM departments as A LEFT JOIN products as B ON (A.department_name = B.department_name) GROUP BY A.department_id", function (err, result) {
         if (err) throw err;
-        console.log(result);
+        // console.log(result);
         // print out the table with data returned from database
         table = new Table({
-            head: ['Department #','Department Name', 'OverHead Cost', 'Product Sales', 'Total Profit'], colWidths: [8, 40,20,20,20]
+            head: ['Dept #','Department Name', 'OverHead Cost', 'Product Sales', 'Total Profit'], colWidths: [8, 40,20,20,20]
         });
-        for (var i = 0; i < result.length-1; i++) {
+        
+        // var objObj={};  // use this to filtering the department as key index and and add total sale for products on same department
+        for (var i = 0; i < result.length; i++) {
             // tableRowInsert(result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].product_sales, "0");
-            tableRowInsert(table,result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].product_sales, "0");
+
+            if(result[i].totalSale != null) { // this is nessasary to show the table without error
+                tableRowInsert(table,result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].totalSale, result[i].totalSale- result[i].over_head_costs);
+            }
         }
         console.log(table.toString()); // display the products on sale
         
         superb(); //back to main menu
-
     });
 }
 
-// function viewLowInventory() {
-//     console.log("Display low inventory products...\n");
-
-//     connection.query("SELECT * FROM products WHERE stock_quantity<5", function (err, result) {
-//         if (err) throw err;
-//         // var itemArr = [];        //define an item Arr to hold the returns json objects from database
-        
-//         if (result == "") console.log("Everything is fine, no low inventory products");
-//         // print out the table with data returned from database
-//         else{
-//             table = new Table({
-//                 head: ['Item #','Product','Department', 'Price', 'Stock Quantity'], colWidths: [8, 40,30,10,20]
-//             });
-//             for (var i = 0; i < result.length; i++) {
-//             // itemArr.push(result[i]);  //push each product into item array
-//             tableRowInsert(result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity);
-//             }
-//             console.log(table.toString()); 
-//         }
-//         managing();  //return to main menu
-//     });
-// }
-
-// function addInventory(){
-//     // need to query the database to select all item with low inventory first then prompt manager to select the item
-//     connection.query("SELECT * FROM products WHERE stock_quantity<5", function (err, result) {
-//         if (err) throw err;
-//         var itemArr = [];//define an item Arr to hold the returns low inverntory json objects from database
-//         var itemArrName = [];
-//         if (result == "") {
-//             console.log("Everything is fine, no low inventory products");
-//             managing(); //back to main menu
-//         }
-//         // print out the table with data returned from database
-//         else{
-//             for(var i = 0; i<result.length; i++){
-//                 itemArr.push(result[i].stock_quantity);
-//                 itemArrName.push(result[i].product_name);
-//             }
-//             // console.log(itemArr);
-
-//             inquirer.prompt([
-//                 {
-//                     type: "list",
-//                     message: "Select a low inventory product from list",
-//                     choices: itemArrName,
-//                     name: "name"
-//                 },
-//                 {
-//                     type: "input",
-//                     message: "How much to re-instock?",
-//                     name: "amount"
-//                 }
-
-//             ]).then(function (response) {
-//                 // console.log(response.name);
-//                 var newAmount = parseInt(itemArr[itemArrName.indexOf(response.name)]) + parseInt(response.amount);
-//                 connection.query("UPDATE products SET ? WHERE ? ",[{stock_quantity:newAmount },{product_name:response.name}],function(err,data){
-//                     if(err) throw err;
-//                     else console.log(data.changedRows + " updated " + response.amount +" of " + response.name + " added.");
-//                     managing(); //back to main menu
-//                 });
-//             });
-//         }
-//     });
-// }
-
-// function addProduct(){
-//     connection.query("SELECT department_name FROM products GROUP BY department_name", function (err, result) {
-//         if (err) throw err;
-//         var itemDeptArr = [];//define an item Arr to hold the returns department Info json objects from database
-
-//         // print out the table with data returned from database
-
-//         for(var i = 0; i<result.length; i++){
-//             itemDeptArr.push(result[i].department_name);
-//         }
-//         // console.log(itemDeptArr);
-
-//         inquirer.prompt([
-//             {
-//                 type: "list",
-//                 message: "Select a product department you want to add product on",
-//                 choices: itemDeptArr,
-//                 name: "deptName"
-//             },
-//             {
-//                 type: "input",
-//                 message: "What's the name of the new product?",
-//                 name: "name"
-//             },{
-//                 type: "input",
-//                 message: "What's the price of the new product?",
-//                 name: "price"
-//             },
-//             {
-//                 type: "input",
-//                 message: "What's the quantity of the new product?",
-//                 name: "quantity"
-//             }
-
-//         ]).then(function (response) {
-//             console.log(response.name);
-//             connection.query("INSERT INTO products SET ?",[{
-//                 stock_quantity:response.quantity,
-//                 price:response.price,
-//                 product_name:response.name,
-//                 department_name:response.deptName 
-//             }],function(err){
-//                 if(err) throw err;
-//                 console.log(response.quantity +" of " + response.name + " added.");
-//                 managing(); //back to main menu
-//             });
-//         }); 
-//     });   
-// }
