@@ -105,16 +105,6 @@ this activity took me about 3 hours
 
 6. The `total_profit` column should be calculated on the fly using the difference between `over_head_costs` and `product_sales`. `total_profit` should not be stored in any database. You should use a custom alias.
 
-7. If you can't get the table to display properly after a few hours, then feel free to go back and just add `total_profit` to the `departments` table.
-
-   * Hint: You may need to look into aliases in MySQL.
-
-   * Hint: You may need to look into GROUP BYs.
-
-   * Hint: You may need to look into JOINS.
-
-   * **HINT**: There may be an NPM package that can log the table to the console. What's is it? Good question :)
-
 
 ## Technology used
 * Node.js
@@ -127,6 +117,91 @@ this activity took me about 3 hours
 
 ## Key learning points
 ```javascript
+// create DB quick reference
+DROP DATABASE IF EXISTS bamazon;
+CREATE DATABASE bamazon;
+USE bamazon;
+
+CREATE TABLE departments (
+  department_id INT NOT NULL AUTO_INCREMENT  PRIMARY KEY,
+  department_name VARCHAR(45) NOT NULL,
+  over_head_costs FLOAT(10,2) NOT NULL
+);
+
+INSERT INTO departments (department_name,over_head_costs) VALUES ("Toy", 900) ,("Game", 800) ("Food",600),("Clothes" , 800);
+```
+
+```javascript
+// connection quick reference
+var connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "password",
+    database: "bamazon"
+});
+```
+
+```javascript
+// Query call sample quick reference
+connection.query("UPDATE products SET ? WHERE ?",
+    [{stock_quantity:number,product_sales:sales},{product_name:name}],
+    function(err,data){
+        if (err) throw err;
+        //data ...
+});
+
+```
+
+```javascript
+// Query call get json data back 
+// my sql alias, join, sum and group by 
+  connection.query("SELECT A.department_id,A.department_name, A.over_head_costs,SUM(B.product_sales) AS totalSale FROM departments as A INNER JOIN products as B ON (A.department_name = B.department_name) GROUP BY A.department_id", function (err, result) {
+    ...
+    tableRowInsert(table,result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].totalSale, result[i].totalSale- result[i].over_head_costs);
+    ...
+  });
+```
+
+```javascript
+// additional stuff save the current order as a sub object in the itemPurchased obj  
+if(itemPurchased[itemName] == null) itemPurchased[itemName]= price.toFixed(2);  //first time purchase this item , create sub obj using itemName as key
+else itemPurchased[itemName] = (parseFloat(itemPurchased[itemName]) + parseFloat(price.toFixed(2))).toFixed(2);
+// note to myself: data back from data base all in string format, if need to do math convert into number type first                    
+```
+
+```javascript
+// Inquirer usage sample quick reference
+inquirer.prompt([
+    {
+        type: "list",
+        message: "Purchase any items on sale or Exit the store?",
+        choices: ["Purchase", "Quit"],
+        name: "action"
+    }
+]).then(function (response) {
+  response.name  ...
+}
+```
+
+```javascript
+// cli table quick reference
+var Table = require('cli-table');
+table = new Table({
+            head: ['Dept #','Department Name', 'OverHead Cost', 'Product Sales'], colWidths: [8, 40,20,20]
+        });
+//define table row insert function, need to insert 2d array
+function tableRowInsert(table,a,b,c,d){
+    arr = [];
+    arr.push(a,b,c,d)
+    table.push(arr);
+}
+```
+
+```javascript
+//notes to myself recursion function managing() return to main menu need to be called inside 
+//connection query to make sure return to main menu after database action finished, 
+//otherwise might throw error due to query itself is async 
 ```
 
 ### Author 

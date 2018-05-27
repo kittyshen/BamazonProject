@@ -149,7 +149,8 @@ function addInventory(){
 }
 
 function addProduct(){
-    connection.query("SELECT department_name FROM products GROUP BY department_name", function (err, result) {
+    //connection.query("SELECT department_name FROM products GROUP BY department_name", function (err, result) {
+    connection.query("SELECT department_name FROM departments", function (err, result) {
         if (err) throw err;
         var itemDeptArr = [];//define an item Arr to hold the returns department Info json objects from database
 

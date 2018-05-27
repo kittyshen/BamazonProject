@@ -28,7 +28,7 @@ connection.connect(function(err) {
 });
 
 //task to do
-//  View Product Sales by Department
+// View Product Sales by Department
 // Create New Department
 
 //notes to myself superb() return to main menu function need to be called inside a 
@@ -76,7 +76,7 @@ function addDept(){
 function viewSales(){
   
     // create sum of rows group by same department reference forum post https://stackoverflow.com/questions/6335240/php-mysql-add-rows-together-to-get-total
-    connection.query("SELECT A.department_id,A.department_name, A.over_head_costs,SUM(B.product_sales) AS totalSale FROM departments as A LEFT JOIN products as B ON (A.department_name = B.department_name) GROUP BY A.department_id", function (err, result) {
+    connection.query("SELECT A.department_id,A.department_name, A.over_head_costs,SUM(B.product_sales) AS totalSale FROM departments as A INNER JOIN products as B ON (A.department_name = B.department_name) GROUP BY A.department_id", function (err, result) {
         if (err) throw err;
         // console.log(result);
         // print out the table with data returned from database
@@ -87,10 +87,10 @@ function viewSales(){
         // var objObj={};  // use this to filtering the department as key index and and add total sale for products on same department
         for (var i = 0; i < result.length; i++) {
             // tableRowInsert(result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].product_sales, "0");
-
-            if(result[i].totalSale != null) { // this is nessasary to show the table without error
-                tableRowInsert(table,result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].totalSale, result[i].totalSale- result[i].over_head_costs);
-            }
+            // note to myself if query of 79 used inner join to replace left join then it will exclude the colmn with has null value alreday don't need next if statement online 91
+            // if(result[i].totalSale != null) { // this is nessasary to show the table without error
+            tableRowInsert(table,result[i].department_id, result[i].department_name, result[i].over_head_costs, result[i].totalSale, result[i].totalSale- result[i].over_head_costs);
+            // }
         }
         console.log(table.toString()); // display the products on sale
         
