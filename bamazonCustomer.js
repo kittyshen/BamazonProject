@@ -94,11 +94,12 @@ function displayProducts() {
                     console.log( purchasedNum + " of " +itemName +"\n");
                     var price = purchasedNum * itemArr[index].price;
                     console.log("Total : " + price.toFixed(2));
-
-                    if(itemPurchased[itemName] == null) itemPurchased[itemName]= price.toFixed(2);  // save the current order as a sub object in the itemPurchased obj
+                    // save the current order as a sub object in the itemPurchased obj  
+                    if(itemPurchased[itemName] == null) itemPurchased[itemName]= price.toFixed(2);  //first time purchase this item , create sub obj using itemName as key
                     else itemPurchased[itemName] = (parseFloat(itemPurchased[itemName]) + parseFloat(price.toFixed(2))).toFixed(2);
                     
                     // console.log(itemPurchased);
+                    // updating database below
                     updateProduct(itemName, availableNum);
 
                 });
@@ -143,7 +144,7 @@ function calTotal(){
         totalPrice += parseFloat(itemPurchased[prop]);
         tableReceipt.push({[prop] : [itemPurchased[prop]]});
     }
-    tableReceipt.push({"Total ": totalPrice});
+    tableReceipt.push({"Total ": totalPrice.toFixed(2)});
 
     ////// vertical cli-table reference
     // tableReceipt.push(
