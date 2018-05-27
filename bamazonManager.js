@@ -117,10 +117,10 @@ function addInventory(){
         // print out the table with data returned from database
         else{
             for(var i = 0; i<result.length; i++){
-                itemArr.push(result[i].item_id);
+                itemArr.push(result[i].stock_quantity);
                 itemArrName.push(result[i].product_name);
             }
-            console.log(itemArr);
+            // console.log(itemArr);
 
             inquirer.prompt([
                 {
@@ -136,8 +136,9 @@ function addInventory(){
                 }
 
             ]).then(function (response) {
-                console.log(response.name);
-                connection.query("UPDATE products SET ? WHERE ? ",[{stock_quantity:response.amount},{product_name:response.name}],function(err,data){
+                // console.log(response.name);
+                var newAmount = parseInt(itemArr[itemArrName.indexOf(response.name)]) + parseInt(response.amount);
+                connection.query("UPDATE products SET ? WHERE ? ",[{stock_quantity:newAmount },{product_name:response.name}],function(err,data){
                     if(err) throw err;
                     else console.log(data.changedRows + " updated " + response.amount +" of " + response.name + " added.");
                     managing(); //back to main menu
@@ -157,7 +158,7 @@ function addProduct(){
         for(var i = 0; i<result.length; i++){
             itemDeptArr.push(result[i].department_name);
         }
-        console.log(itemDeptArr);
+        // console.log(itemDeptArr);
 
         inquirer.prompt([
             {
