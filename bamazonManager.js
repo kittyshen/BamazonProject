@@ -145,31 +145,54 @@ function addInventory(){
             });
         }
     });
-    
 }
 
-// function updateProduct(name, number){
-//     connection.query("UPDATE products SET ? WHERE ?",
-//     [{stock_quantity:number},{product_name:name}],
-//     function(err,data){
-//         if (err) throw err;
-//         // console.log(data.affectedRows + " Updated.");
-//     });
-//     inquirer.prompt([
-//         {
-//             type: "list",
-//             message: "Make More purchase? Exit the store?",
-//             choices: ["Purchase", "Quit"],
-//             name: "action"
-//         }
-//     ]).then(function (response) {
-//         if (response.action == "Quit") { // if user don't wanna buy ,end the connection
-//                 calTotal();
-//                 console.log("Thanks for visiting bamazon, See you again!");
-//                 connection.end();
-//             }
-//         else {  
-//             displayProducts();
-//         }
-//     });
-// }
+function addProduct(){
+    connection.query("SELECT department_name FROM products GROUP BY department_name", function (err, result) {
+        if (err) throw err;
+        var itemDeptArr = [];//define an item Arr to hold the returns department Info json objects from database
+
+        // print out the table with data returned from database
+
+        for(var i = 0; i<result.length; i++){
+            itemDeptArr.push(result[i].department_name);
+        }
+        console.log(itemDeptArr);
+
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "Select a product department you want to add product on",
+                choices: itemDeptArr,
+                name: "deptName"
+            },
+            {
+                type: "input",
+                message: "What's the name of the new product?",
+                name: "name"
+            },{
+                type: "input",
+                message: "What's the price of the new product?",
+                name: "price"
+            },
+            {
+                type: "input",
+                message: "What's the quantity of the new product?",
+                name: "quantity"
+            }
+
+        ]).then(function (response) {
+            console.log(response.name);
+            connection.query("INSERT INTO products SET ?",[{
+                stock_quantity:response.quantity,
+                price:response.price,
+                product_name:response.name,
+                department_name:response.deptName 
+            }],function(err){
+                if(err) throw err;
+                console.log(response.quantity +" of " + response.name + " added.");
+                managing(); //back to main menu
+            });
+        }); 
+    });   
+}
