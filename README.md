@@ -27,7 +27,7 @@ If you haven't written a markdown file yet, [click here for a rundown](https://g
 
 ### Challenge #1: Customer View (Minimum Requirement)
 
-![Bamazon Customer View](Images/Bamazon-Customer.gif)
+![Bamazon Customer View](demoImg/bamazonCustomer.gif)
 
 1. Create a MySQL Database called `bamazon`.
 
@@ -56,22 +56,19 @@ If you haven't written a markdown file yet, [click here for a rundown](https://g
 
 7. Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
 
-   * If not, the app should log a phrase like `Insufficient quantity!`, and then prevent the order from going through.
+   * If not, the app should log a phrase like `Insufficient quantity!`, and then add max possible amount in stock to cart.
 
 8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
    * This means updating the SQL database to reflect the remaining quantity.
    * Once the update goes through, show the customer the total cost of their purchase.
 
-- - -
+ If this activity took me about 3 hours
 
-* If this activity took you between 8-10 hours, then you've put enough time into this assignment. Feel free to stop here -- unless you want to take on the next challenge.
-
-- - -
 
 ### Challenge #2: Manager View (Next Level)
 
 
-![Bamazon Manager View](Images/Bamazon-Manager.gif)
+![Bamazon Manager View](demoImg/bamazonManager.gif)
 
 * Create a new Node application called `bamazonManager.js`. Running this application will:
 
@@ -101,7 +98,7 @@ If you haven't written a markdown file yet, [click here for a rundown](https://g
 
 ### Challenge #3: Supervisor View (Final Level)
 
-![Bamazon Supervisor View](Images/Bamazon-Supervisor.gif)
+![Bamazon Supervisor View](demoImg/bamazonSupervisor.gif)
 
 1. Create a new MySQL table called `departments`. Your table should include the following columns:
 
@@ -145,6 +142,10 @@ If you haven't written a markdown file yet, [click here for a rundown](https://g
 
 ## Technology used
 * Node.js
+* Node package used :
+  * inquirer:   npm install inquirer
+  * mysql:  npm install  mysql
+  * cli table:  npm install cli-table
 * javascript
 * MySQL
 
