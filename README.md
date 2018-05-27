@@ -68,7 +68,7 @@ this activity took me about 3 hours
 
 - - -
 
-* If you finished Challenge #2 and put in all the hours you were willing to spend on this activity, then rest easy! Otherwise continue to the next and final challenge.
+* About another 2 hours.
 
 - - -
 

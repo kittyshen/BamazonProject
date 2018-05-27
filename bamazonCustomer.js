@@ -15,7 +15,6 @@ function tableRowInsert(a,b,c,d,e){
     table.push(arr);
 }
 // tableRowInsert(2,4,5,6,3,2);
-
 // console.log(table.toString());
 
 
@@ -31,6 +30,8 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+    // alter the product table add product sale column only need to run once
+    // connection.query("ALTER TABLE products ADD product_sales FLOAT(10,2) NOT NULL DEFAULT 0");
     displayProducts();
 });
 
@@ -83,6 +84,7 @@ function displayProducts() {
                     // console.log(itemArr[index]);
                     var itemName = itemArr[index].product_name;
                     var availableNum = itemArr[index].stock_quantity;  // check items stock inventory 
+                    var productSales = itemArr[index].product_sales;
                     if (availableNum < response.itemNum) { // if user input more than available stock of the item, display error 
                         console.log("Sorry, insufficient stock. there is only " + availableNum + " of " + itemName + " available,");
                         console.log("Default amount of " + availableNum + " add to cart. More on the way!");
@@ -94,13 +96,17 @@ function displayProducts() {
                     console.log( purchasedNum + " of " +itemName +"\n");
                     var price = purchasedNum * itemArr[index].price;
                     console.log("Total : " + price.toFixed(2));
-                    // save the current order as a sub object in the itemPurchased obj  
+
+                    // additional stuff save the current order as a sub object in the itemPurchased obj  
                     if(itemPurchased[itemName] == null) itemPurchased[itemName]= price.toFixed(2);  //first time purchase this item , create sub obj using itemName as key
                     else itemPurchased[itemName] = (parseFloat(itemPurchased[itemName]) + parseFloat(price.toFixed(2))).toFixed(2);
+                    // ends here save the current order as a sub object in the itemPurchased obj 
                     
-                    // console.log(itemPurchased);
+                    // getting new product sales info for user purchased item
+                    var newProductSales = parseFloat(productSales) + parseFloat(price.toFixed(2));
+                    console.log(newProductSales);
                     // updating database below
-                    updateProduct(itemName, availableNum);
+                    updateProduct(itemName, availableNum,newProductSales);
 
                 });
             }
@@ -108,9 +114,9 @@ function displayProducts() {
     });
 }
 
-function updateProduct(name, number){
+function updateProduct(name, number,sales){
     connection.query("UPDATE products SET ? WHERE ?",
-    [{stock_quantity:number},{product_name:name}],
+    [{stock_quantity:number,product_sales:sales},{product_name:name}],
     function(err,data){
         if (err) throw err;
         // console.log(data.affectedRows + " Updated.");
