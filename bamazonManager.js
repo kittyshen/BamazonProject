@@ -37,6 +37,10 @@ connection.connect(function(err) {
 //   View Low Inventory
 //   Add to Inventory
 //   Add New Product
+//
+//notes to myself managing() return to main menu function need to be called inside a 
+//connection query to make sure return to main menu after database action finished, 
+//otherwise might throw error due to query itself is async 
 function managing(){
     inquirer.prompt([
         {
@@ -71,6 +75,9 @@ function viewProduct() {
             tableRowInsert(result[i].item_id, result[i].product_name, result[i].department_name, result[i].price, result[i].stock_quantity);
         }
         console.log(table.toString()); // display the products on sale
+        
+        managing(); //back to main menu
+
     });
 }
 
@@ -95,6 +102,50 @@ function viewLowInventory() {
         }
         managing();  //return to main menu
     });
+}
+
+function addInventory(){
+    // need to query the database to select all item with low inventory first then prompt manager to select the item
+    connection.query("SELECT * FROM products WHERE stock_quantity<5", function (err, result) {
+        if (err) throw err;
+        var itemArr = [];//define an item Arr to hold the returns low inverntory json objects from database
+        var itemArrName = [];
+        if (result == "") {
+            console.log("Everything is fine, no low inventory products");
+            managing(); //back to main menu
+        }
+        // print out the table with data returned from database
+        else{
+            for(var i = 0; i<result.length; i++){
+                itemArr.push(result[i].item_id);
+                itemArrName.push(result[i].product_name);
+            }
+            console.log(itemArr);
+
+            inquirer.prompt([
+                {
+                    type: "list",
+                    message: "Select a low inventory product from list",
+                    choices: itemArrName,
+                    name: "name"
+                },
+                {
+                    type: "input",
+                    message: "How much to re-instock?",
+                    name: "amount"
+                }
+
+            ]).then(function (response) {
+                console.log(response.name);
+                connection.query("UPDATE products SET ? WHERE ? ",[{stock_quantity:response.amount},{product_name:response.name}],function(err,data){
+                    if(err) throw err;
+                    else console.log(data.changedRows + " updated " + response.amount +" of " + response.name + " added.");
+                    managing(); //back to main menu
+                });
+            });
+        }
+    });
+    
 }
 
 // function updateProduct(name, number){
