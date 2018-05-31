@@ -180,7 +180,7 @@ inquirer.prompt([
         name: "action"
     }
 ]).then(function (response) {
-  response.name  ...
+  response.action  ...
 }
 ```
 
